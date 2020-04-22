@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(process.env.CLIENT_ID);
+const { genToken } = require('../middlewares/autenticacion');
 
 
 const Usuario = require('../models/usuarios');
@@ -19,15 +20,11 @@ router
                 if (!bcrypt.compareSync(body.password, usuarioDB.password)) {
                     return res.status(400).json({ ok: false, err: { message: 'Usuario o contraseña incorrectos' } });
                 }
-                // let token = genToken(usuarioDB);
-                let token = jwt.sign({ usuarioDB }, 'este-es-el-sid-desarrollo', { expiresIn: 60 * 60 * 24 * 30 });
+                let token = genToken(usuarioDB);
                 res.json({ ok: true, usuario: usuarioDB, token });
 
             })
-            .catch(err => {
-                res.status(500).json({ ok: false, err });
-                console.log(err);
-            });
+            .catch(err => { res.status(500).json({ ok: false, err }) });
 
 
     })
@@ -57,47 +54,38 @@ router
 
         let token = req.body.idtoken;
         let googleUser = await verify(token)
-            .catch(e => {
-                return res.status(403).json({
-                    ok: false,
-                    err: e
-                })
-            })
-        Usuario.findOne({ email: googleUser.email }, (err, usuarioDB) => {
-            if (err) return res.status(500).json({ ok: false, err });
-            if (usuarioDB) {
-                if (usuarioDB.google === false) {
-                    return res.status(400).json({ ok: false, err: { message: 'Debe usar su autenticacion normal' } });
-                } else {
-                    let token = jwt.sign({ usuario: usuarioDB },
-                        process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN }
-                    );
+            .catch(e => { return res.status(403).json({ ok: false, err: e }) });
 
-                    res.json({ ok: true, usuario: usuarioDB, token });
+        Usuario.findOne({ email: googleUser.email })
+            .then(usuarioDB => {
+                if (usuarioDB) {
+                    if (usuarioDB.google === false) {
+                        return res.status(400).json({ ok: false, err: { message: 'Debe usar su autenticacion normal' } });
+                    } else {
+                        let token = genToken(usuarioDB);
+                        res.json({ ok: true, usuario: usuarioDB, token });
+
+                    }
+
+                } else {
+                    // si el usuario no existe en nuestra base de datos
+                    let usuario = new Usuario();
+                    usuario.nombre = googleUser.nombre;
+                    usuario.email = googleUser.email;
+                    usuario.img = googleUser.img;
+                    usuario.password = ':)';
+                    usuario.save()
+                        .then(usuarioDB => {
+                            let token = genToken(usuarioDB);
+                            res.json({ ok: true, usuario: usuarioDB, token })
+                        })
+                        .catch(err => { return res.status(500).json({ ok: false, err }) });
 
                 }
+            })
+            .catch(err => { return res.status(500).json({ ok: false, err }) });
 
-            } else {
-                // si el usuario no existe en nuestra base de datos
-                let usuario = new Usuario();
-                usuario.nombre = googleUser.nombre;
-                usuario.email = googleUser.email;
-                usuario.img = googleUser.img;
-                usuario.password = ':)';
-                usuario.save((err, usuarioDB) => {
-                    if (err) return res.status(500).json({ ok: false, err });
-                    let token = jwt.sign({ usuario: usuarioDB },
-                        process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN }
-                    );
 
-                    res.json({ ok: true, usuario: usuarioDB, token });
-                })
-            }
-        })
     });
-
-
-
-
 
 module.exports = router;

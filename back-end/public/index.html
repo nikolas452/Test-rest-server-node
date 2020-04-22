@@ -8,8 +8,8 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <!-- Meta Google -->
-    <meta name="google-signin-client_id" content="612323489965-dr2be1a100p75el3a57qiuqn0dl596su.apps.googleusercontent.com">
+    <!-- Cliente ID -->
+    <meta name="google-signin-client_id" content="853798314313-92vs3gddd9au3dticv2aiq0q3jfgd01k.apps.googleusercontent.com">
 
     <title>TEST</title>
 </head>
@@ -27,6 +27,17 @@
                         console.log('Name: ' + profile.getName());
                         console.log('Image URL: ' + profile.getImageUrl());
                         console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+
+
+                        var id_token = googleUser.getAuthResponse().id_token;
+                        console.log(id_token);
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', '/google');
+                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                        xhr.onload = function() {
+                            console.log('Signed in as: ' + xhr.responseText);
+                        };
+                        xhr.send('idtoken=' + id_token);
                     }
                 </script>
                 <a href="#" onclick="signOut();">Sign out</a>

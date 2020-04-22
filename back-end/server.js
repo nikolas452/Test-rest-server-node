@@ -14,8 +14,6 @@ app.use(bodyParser.json());
 app.use(express.static(path.resolve(__dirname, './public')));
 
 //Rutas
-// app.use(require('./routes/login'));
-// app.use(require('./routes/usuario'));
 app.use(require('./routes/all-routes'));
 
 

@@ -23,4 +23,15 @@ let verificaAdmin_Role = (req, res, next) => {
         next();
     } else return res.json({ ok: false, err: { message: 'El usuario no es administrador' } });
 }
-module.exports = { verificarToken, verificaAdmin_Role }
+
+// =====================
+// Generar Token
+// =====================
+let genToken = (usuarioRecibido) => {
+    let token = jwt.sign({ usuario: usuarioRecibido }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
+    return token;
+}
+
+
+
+module.exports = { verificarToken, verificaAdmin_Role, genToken };
