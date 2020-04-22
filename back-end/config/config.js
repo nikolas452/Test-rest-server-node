@@ -33,7 +33,7 @@ let urlDB;
 if (process.env.NODE_ENV === 'dev') {
     urlDB = 'mongodb://localhost:27017/Test';
 } else {
-    urlDB = 'mongodb+srv://Test:test@cluster0-c0sw1.mongodb.net/test?retryWrites=true&w=majority'
+    urlDB = process.env.MONGO_URI;
 }
 // mongodb+srv://Test:test@cluster0-c0sw1.mongodb.net/test?retryWrites=true&w=majority
 
