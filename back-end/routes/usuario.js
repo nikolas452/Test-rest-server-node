@@ -1,12 +1,16 @@
 const express = require('express');
 const router = express.Router();
+
 const Usuario = require('../models/usuarios');
+
 const _ = require('underscore');
 const bcrypt = require('bcrypt');
 
+const { verificarToken, verificaAdmin_Role } = require('../middlewares/autenticacion');
+
 router
     .route('/usuario')
-    .post((req, res) => {
+    .post([verificarToken, verificaAdmin_Role], (req, res) => {
         let { nombre, email, password, role } = req.body;
         let user = new Usuario({ nombre, email, password: bcrypt.hashSync(password, 10), role });
 
@@ -16,7 +20,7 @@ router
 
         return res.json({ ok: true, message: 'User saved' });
     })
-    .get((req, res) => {
+    .get(verificarToken, (req, res) => {
         let desde = req.query.desde || 0;
         desde = Number(desde);
 
@@ -36,7 +40,7 @@ router
 
 router
     .route('/usuario/:id')
-    .put((req, res) => {
+    .put([verificarToken, verificaAdmin_Role], (req, res) => {
         let id = req.params.id;
         let body = _.pick(req.body, ['nombre', 'email', 'img', 'role', 'estado']);
 
@@ -52,7 +56,7 @@ router
         .catch(err => { return res.status(400).json({ ok: false, err }) });
 })
 
-.delete((req, res) => {
+.delete([verificarToken, verificaAdmin_Role], (req, res) => {
     let id = req.params.id;
     Usuario.findByIdAndUpdate(id, { estado: false }, { new: true, runValidators: true })
         .then(usuarioDB => { res.json({ ok: true, usuario: usuarioDB }) })

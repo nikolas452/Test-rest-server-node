@@ -33,8 +33,9 @@ let urlDB;
 if (process.env.NODE_ENV === 'dev') {
     urlDB = 'mongodb://localhost:27017/Test';
 } else {
-    urlDB = process.env.MONGO_URI;
+    urlDB = 'mongodb+srv://Test:test@cluster0-c0sw1.mongodb.net/test?retryWrites=true&w=majority'
 }
+// mongodb+srv://Test:test@cluster0-c0sw1.mongodb.net/test?retryWrites=true&w=majority
 
 process.env.URLDB = urlDB;
 
