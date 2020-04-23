@@ -35,8 +35,8 @@ if (process.env.NODE_ENV === 'dev') {
 } else {
     urlDB = process.env.MONGO_URI;
 }
-// mongodb+srv://Test:test@cluster0-c0sw1.mongodb.net/test?retryWrites=true&w=majority
 
+// mongodb+srv://Test:test@cluster0-c0sw1.mongodb.net/test?retryWrites=true&w=majority
 process.env.URLDB = urlDB;
 
 // ========================================

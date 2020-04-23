@@ -28,10 +28,23 @@ let verificaAdmin_Role = (req, res, next) => {
 // Generar Token
 // =====================
 let genToken = (usuarioRecibido) => {
-    let token = jwt.sign({ usuario: usuarioRecibido }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
-    return token;
+        let token = jwt.sign({ usuario: usuarioRecibido }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
+        return token;
+    }
+    // =====================
+    // Verifica token img
+    // =====================
+let verificarImg = (req, res, next) => {
+    let token = req.query.token;
+
+
+    jwt.verify(token, process.env.SEED, (err, decoded) => {
+        if (err) return res.status(400).json({ ok: false, err });
+
+        req.usuario = decoded.usuario;
+        next();
+    });
 }
 
 
-
-module.exports = { verificarToken, verificaAdmin_Role, genToken };
+module.exports = { verificarToken, verificaAdmin_Role, genToken, verificarImg };
